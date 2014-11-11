@@ -1,0 +1,9 @@
+#!/bin/bash 
+cd ../src
+#make clean
+make
+cd ../prog
+mpirun -np 6 tbdg
+
+
+
