@@ -26,6 +26,17 @@ void cDistribute::distribution(int NJOBS){
   recvcount = compute_count(_rank,_size,NJOBS); // This is a rank dependent variable.
   recvbuf = new int[recvcount]; // So is this array: rank dependent size
   MPI_Scatterv(sendbuf,sendcounts,displs,MPI_INT,recvbuf,recvcount,MPI_INT,_root,COMM_WORLD);
+  if (_root==_rank){
+	  recvcounts = new int[_size];
+	  displs_r = new int[_size];
+	  offset = 0;
+	  for(int ig = 0;ig<_size;++ig){
+		  recvcounts[ig] = compute_count(ig,_size,NJOBS);
+		  displs_r[ig] = offset;
+		  offset += recvcounts[ig];
+	  }
+  }
+
 }
 
 void cDistribute::print_rank(){
