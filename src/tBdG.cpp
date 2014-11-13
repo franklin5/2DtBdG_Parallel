@@ -140,14 +140,13 @@ void ctBdG::quench(){
 //		MPI_Bcast(&_delta.imag(), 1, MPI_DOUBLE, _root, MPI_COMM_WORLD);
 		// rinse and repeat
 		if (_rank == _root) {
-			if ((nt+1)%int(1/_dt)==0) {
+			if ((nt+1)%int(0.1/_dt)==0) {
 				 cout << _delta << endl;
 				 delta_output << (nt+1)*_dt << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
 			}
-			delta_output.close();
 		}
 	}
-
+	delta_output.close();
 }
 
 
