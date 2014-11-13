@@ -130,7 +130,7 @@ void ctBdG::quench(){
 		sprintf(filename,"hi_%ghf_%g.dat",_hi,_hf); // Use the shortest representation %g
 		delta_output.open(filename);delta_output.is_open();
 		akx.open("akx.OUT");akx.is_open();
-		akx.open("aky.OUT");aky.is_open();
+		aky.open("aky.OUT");aky.is_open();
 		for (int nk = 0; nk < _NK; ++nk) {
 			akx << _gauss_k[nk] << endl;
 			aky << _gauss_k[nk] << endl;
