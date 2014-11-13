@@ -1,233 +1,215 @@
 /*
  * tBdG.cpp
  *
- *  Created on: Feb 5, 2014
+ *  Created on: Nov 11, 2014
  *      Author: ld7
  */
 
 #include "tBdG.h"
+#include "lgwt.h"
 
 void ctBdG :: input(){
-	for (int ig = 0; ig < _size; ++ig) {
-		if (ig ==_rank){
-		  char dummyname[100];
-		  double dummyvalue;
-		  int intdummyvalue;
-		  FILE *input;
-		  input = fopen("input.txt","r");
-		  assert(input != NULL);
-		  if (ig == _root)  cout << "Starting to read in parameters from file input.txt" << endl;
-		  fscanf(input,"%s %lf", dummyname, &dummyvalue);
-		  _hi = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _hi << endl;
+  for (int ig = 0; ig < _size; ++ig) {
+    if (ig ==_rank){
+      char dummyname[100];
+      double dummyvalue;
+      int intdummyvalue;
+      FILE *input;
+      input = fopen("input.txt","r");
+      assert(input != NULL);
+      if (ig == _root)  cout << "Starting to read in parameters from file input.txt" << endl;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _hi = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _hi << endl;
+      
+      FILE *sf_input;
+      sf_input = fopen ("superfluid.dat","r"); // Zeeman, Delta, Mu, Eg
+      double dummyH, dummyD, dummyM, dummyE;
+      assert (sf_input != NULL);
+      for (int nsf_input = 0; nsf_input <= int(_hi/0.001); ++nsf_input) {
+	fscanf(sf_input, "%lf %lf %lf %lf", &dummyH, &dummyD, &dummyM, &dummyE);
+      }
+      fclose (sf_input);
+      _delta.real() = dummyD; _delta.imag() = 0.0;
+      _mu = dummyM;
 
-		  FILE *sf_input;
-		  	sf_input = fopen ("superfluid.dat","r"); // Zeeman, Delta, Mu, Eg
-		  	double dummyH, dummyD, dummyM, dummyE;
-		  	assert (sf_input != NULL);
-		  	for (int nsf_input = 0; nsf_input <= int(_hi/0.001); ++nsf_input) {
-		  		fscanf(sf_input, "%lf %lf %lf %lf", &dummyH, &dummyD, &dummyM, &dummyE);
-		  	}
-		  	fclose (sf_input);
-		  	_delta.real() = dummyD; _delta.imag() = 0.0;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _hf = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _hf << endl;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _Eb = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _Eb << endl;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _v = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _v << endl;
+      fscanf(input,"%s %d", dummyname, &intdummyvalue);
+      _NK = intdummyvalue;    if (ig == _root) cout << dummyname << "=" << _NK << endl;
+      _NK2 = _NK*_NK;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _kc = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _kc << endl;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _dt = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _dt << endl;
+      fscanf(input,"%s %lf", dummyname, &dummyvalue);
+      _total_t = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _total_t << endl;
 
-		  fscanf(input,"%s %lf", dummyname, &dummyvalue);
-		_hf = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _hf << endl;
-		fscanf(input,"%s %lf", dummyname, &dummyvalue);
-		_Eb = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _Eb << endl;
-		  fscanf(input,"%s %lf", dummyname, &dummyvalue);
-		  _v = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _v << endl;
-		  fscanf(input,"%s %d", dummyname, &intdummyvalue);
-		  _NK = intdummyvalue;    if (ig == _root) cout << dummyname << "=" << _NK << endl;
-		  _NK2 = _NK*_NK;
-		fscanf(input,"%s %lf", dummyname, &dummyvalue);
-		_kc = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _kc << endl;
-		_Ueff = (-8.0*M_PI)/log(1.0+2.0*_kc*_kc/_Eb);
 
-		_bdg_E.resize(4);
-		_bdg.resize(4,4);
-		_bdg_u.resize(_NK2,4);
-		_bdg_a.resize(_NK2,4);
-		_bdg_b.resize(_NK2,4);
-		_bdg_v.resize(_NK2,4);
-		}
-	}
+      fclose(input);
 
-}
+      _Ueff = (-8.0*M_PI)/log(1.0+2.0*_kc*_kc/_Eb);
 
-void ctBdG :: update_Delta(double dt, complex<double>& Delta, double& N0, double& N1){
-	Delta.real() = 0.0; Delta.imag() = 0.0;
-	N0 = 0.0; N1 =0.0;
-    RK_Propagator(dt); // UPDATE wave functions for the next iteration.
+      _bdg.resize(4,4);
+      _gauss_k = new double [_NK];
+      _gauss_w_k = new double [_NK];
+      gauss_lgwt(_NK,-_kc,_kc,_gauss_k,_gauss_w_k);
 
-    for (int nk = 0; nk < _NK; ++nk) {
-//    		result += complex<double> (_gauss_w_k[nk],0.0) * integrand(nk);
-    	Delta += _gauss_w_k[nk] * integrand(nk);
-	N0    += _gauss_w_k[nk] * N0_CF(nk);
-	N1    += _gauss_w_k[nk] * N1_CF(nk);
+      myI = complex<double> (0.0,1.0);
     }
-    _delta = Delta; // UPDATE delta for the next iteration!!!
-}
-
-void ctBdG:: RK_Propagator(double dt){
-	double normwv;
-	complex<double> ncI(0.0,-1.0);
-	VectorXcd wvVec(4), k1(4), k2(4), k3(4), k4(4);
-	for (int nk = 0; nk < _NK; ++nk) {
-		for (int eta = 0; eta < 4; ++eta) {
-			wvVec(0) = _bdg_u(nk,eta);
-			wvVec(1) = _bdg_a(nk,eta);
-			wvVec(2) = _bdg_b(nk,eta);
-			wvVec(3) = _bdg_v(nk,eta);
-
-			MatrixXcd bdg(4,4);
-			construct_BdG(bdg, _gauss_k[nk], 0.0); // TODO: set mu = 0 temperarily.
-			k1 = ncI * (bdg *  wvVec);
-			k2 = ncI * (bdg * (wvVec+dt*k1*0.5));
-			k3 = ncI * (bdg * (wvVec+dt*k2*0.5));
-			k4 = ncI * (bdg * (wvVec+dt*k3));
-			wvVec += dt*(k1+2.0*k2+2.0*k3+k4)/6.0;
-			normwv = wvVec.norm();
-			wvVec /= normwv;
-			//		cout << normwv << endl;
-			_bdg_u(nk,eta) = wvVec(0);
-			_bdg_a(nk,eta) = wvVec(1);
-			_bdg_b(nk,eta) = wvVec(2);
-			_bdg_v(nk,eta) = wvVec(3);
-// _bdg_E(nk,eta) = wvVec.adjoint() * bdg * wvVec; // Don't update Ek(t). Use Ek(0) for all the time!
-
-		}
-	}
-}
-
-
-complex<double> ctBdG :: integrand(int nk){
-
-    complex<double> result (0.0,0.0);
-    complex<double> u, a, b, v, E;
-//    complex<double> prefactor (-_Ueff*0.5/(4.0*M_PI*M_PI)*_gauss_k[nk]*(2*M_PI),0.0);
-    double prefactor = -_Ueff/(4.0*M_PI)*_gauss_k[nk];
-    for (int eta=0; eta<4; ++eta) {
-
-        E = _bdg_E(nk,eta);
-        u = _bdg_u(nk,eta);
-        a = _bdg_a(nk,eta);
-        b = _bdg_b(nk,eta);
-        v = _bdg_v(nk,eta);
-
-        switch (sgn(E.real())) {
-            case -1:
-                result += prefactor * u * conj(v);
-                break;
-            case 1:
-                result += prefactor * a * conj(b);
-                break;
-            case 0:
-                result += prefactor * (u * conj(v) + a * conj(b))/2.0;
-                break;
-            default:
-                break;
-        }
-    }
-    return result;
-}
-
-double ctBdG :: N0_CF(int nk){
-
-    complex<double> result (0.0,0.0);
-    complex<double> u, a, b, v, E;
-    double prefactor = 1.0/(8.0*M_PI)*_gauss_k[nk];
-    for (int eta=0; eta<4; ++eta) {
-
-        E = _bdg_E(nk,eta);
-        u = _bdg_u(nk,eta);
-        a = _bdg_a(nk,eta);
-        b = _bdg_b(nk,eta);
-        v = _bdg_v(nk,eta);
-
-        switch (sgn(E.real())) {
-            case -1:
-                result += u * conj(v);
-                break;
-            case 1:
-                result += a * conj(b);
-                break;
-            case 0:
-                result += (u * conj(v) + a * conj(b))/2.0;
-                break;
-            default:
-                break;
-        }
-    }
-    return prefactor * pow(abs(result),2.0);
-}
-
-double ctBdG :: N1_CF(int nk){
-
-    complex<double> result (0.0,0.0);
-    complex<double> u, a, b, v, E;
-    double prefactor = 1.0/(8.0*M_PI)*_gauss_k[nk];
-    for (int eta=0; eta<4; ++eta) {
-
-        E = _bdg_E(nk,eta);
-        u = _bdg_u(nk,eta);
-        a = _bdg_a(nk,eta);
-        b = _bdg_b(nk,eta);
-        v = _bdg_v(nk,eta);
-
-        switch (sgn(E.real())) {
-            case -1:
-                result += u * conj(b);
-                break;
-            case 1:
-                result += a * conj(v);
-                break;
-            case 0:
-                result += (u * conj(b) + a * conj(v))/2.0;
-                break;
-            default:
-                break;
-        }
-    }
-    return prefactor * pow(abs(result),2.0);
+  }
 }
 
 void ctBdG:: Initialize_Euabv(){
+	SelfAdjointEigenSolver<MatrixXcd> ces;
+	distribution(_NK2);
+    int nkx, nky, nk;
+    for (int ig = 0; ig < _size; ++ig) {
+		if (ig==_rank) {
+			_bdg_E.resize(recvcount,4);
+			_bdg_u.resize(recvcount,4);
+			_bdg_a.resize(recvcount,4);
+			_bdg_b.resize(recvcount,4);
+			_bdg_v.resize(recvcount,4);
+			for (int i = 0; i < recvcount; ++i) {
 
-    MatrixXcd bdg(4,4);
-    ComplexEigenSolver<MatrixXcd> ces;
-    // could be possibly set to SelfAdjointEigenSolver<MatrixXcd> ces;
-    for (int nk=0; nk<_NK; ++nk) {
-    	construct_BdG(bdg, _gauss_k[nk], _mu);
-    	ces.compute(bdg);
-    	_bdg_E.row(nk) = ces.eigenvalues();
-    	_bdg_u.row(nk) = ces.eigenvectors().row(0);
-    	_bdg_a.row(nk) = ces.eigenvectors().row(1);
-    	_bdg_b.row(nk) = ces.eigenvectors().row(2);
-    	_bdg_v.row(nk) = ces.eigenvectors().row(3);
-    }
+				nk = recvbuf[i];
+				nkx = nk%_NK;
+				nky = int(nk/_NK);
+
+				construct_BdG(_gauss_k[nkx],_gauss_k[nky], _mu, _hi);
+				ces.compute(_bdg);
+
+				_bdg_E.row(i) = ces.eigenvalues();
+				_bdg_u.row(i) = ces.eigenvectors().row(0);
+				_bdg_a.row(i) = ces.eigenvectors().row(1);
+				_bdg_b.row(i) = ces.eigenvectors().row(2);
+				_bdg_v.row(i) = ces.eigenvectors().row(3);
+			}
+		}
+	}
+}
+
+void ctBdG:: construct_BdG(double kx, double ky, double mu, double h){
+	double xi = kx*kx+ky*ky-mu;
+	_bdg(0,0) = complex<double> (xi+h,0.0);
+	_bdg(0,1) = complex<double> (_v*kx,-_v*ky);
+	_bdg(0,2) = complex<double> (0.0,0.0);
+	_bdg(0,3) = -_delta;
+	_bdg(1,0) = complex<double> (_v*kx,_v*ky);
+	_bdg(1,1) = complex<double> (xi-h,0.0);
+	_bdg(1,2) = _delta;
+	_bdg(1,3) = complex<double> (0.0,0.0);
+	_bdg(2,0) = complex<double> (0.0,0.0);
+	_bdg(2,1) = conj(_delta);
+	_bdg(2,2) = complex<double> (-(xi+h),0.0);
+	_bdg(2,3) = complex<double> (_v*kx,_v*ky);
+	_bdg(3,0) = -conj(_delta);
+	_bdg(3,1) = complex<double> (0.0,0.0);
+	_bdg(3,2) = complex<double> (_v*kx,-_v*ky);
+	_bdg(3,3) = complex<double> (-xi+h,0.0);
+
+}
+
+void ctBdG::quench(){
+// quench takes place by changing h from h_i to h_f value at time t = 0.
+	complex<double> localDelta;
+	ofstream delta_output;
+	if (_rank == _root) {
+//		string filename = "hi_" + to_string(_hi) + "hf_" + to_string(_hf) + ".dat"; // --> This is only available for c++11 feature...
+//		delta_output.open(filename.c_str());
+		char filename[50];
+		sprintf(filename,"hi_%ghf_%g.dat",_hi,_hf); // Use the shortest representation %g
+		delta_output.open(filename);
+		delta_output.is_open();
+		cout << _delta << endl;
+		delta_output << 0.0 << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
+	}
+	for (int nt = 0; nt < int(_total_t/_dt); ++nt) {
+		compute_DeltaK(localDelta);
+		// gather or reduce to rank 0 to update \Delta(t) value
+		MPI_Reduce(&localDelta, &_delta, 1, MPI_C_DOUBLE_COMPLEX, MPI_SUM, _root, MPI_COMM_WORLD);
+//		MPI_Reduce(&localDelta.real(), &_delta.real(), 1, MPI_DOUBLE, MPI_SUM, _root, MPI_COMM_WORLD);
+//		MPI_Reduce(&localDelta.imag(), &_delta.imag(), 1, MPI_DOUBLE, MPI_SUM, _root, MPI_COMM_WORLD);
+		// scatter or broadcast \Delta(t) to all rank
+		MPI_Bcast(&_delta, 1, MPI_C_DOUBLE_COMPLEX, _root, MPI_COMM_WORLD);
+//		MPI_Bcast(&_delta.real(), 1, MPI_DOUBLE, _root, MPI_COMM_WORLD);
+//		MPI_Bcast(&_delta.imag(), 1, MPI_DOUBLE, _root, MPI_COMM_WORLD);
+		// rinse and repeat
+		if (_rank == _root) {
+			if ((nt+1)%int(1/_dt)==0) {
+				 cout << _delta << endl;
+				 delta_output << (nt+1)*_dt << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
+			}
+			delta_output.close();
+		}
+	}
+
 }
 
 
-void ctBdG :: construct_BdG(MatrixXcd& bdg, double k, double mu){
-	double xi = k*k - mu;
-
-	bdg(0,0) = complex<double> (xi+_h,0.0);
-	bdg(0,1) = complex<double> (_v*k,0.0);
-	bdg(0,2) = complex<double> (0.0,0.0);
-	bdg(0,3) = -_delta;
-	bdg(1,0) = complex<double> (_v*k,0.0);
-	bdg(1,1) = complex<double> (xi-_h,0.0);
-	bdg(1,2) = _delta;
-	bdg(1,3) = complex<double> (0.0,0.0);
-	bdg(2,0) = complex<double> (0.0,0.0);
-	bdg(2,1) = conj(_delta);
-	bdg(2,2) = complex<double> (-(xi+_h),0.0);
-	bdg(2,3) = complex<double> (_v*k,0.0);
-	bdg(3,0) = -conj(_delta);
-	bdg(3,1) = complex<double> (0.0,0.0);
-	bdg(3,2) = complex<double> (_v*k,0.0);
-	bdg(3,3) = complex<double> (-xi+_h,0.0);
+void ctBdG:: compute_DeltaK(complex<double>& localDelta){
+    int nkx, nky, nk;
+    complex<double> result;
+	for (int ig = 0; ig < _size; ++ig) {
+		if (ig==_rank) {
+			localDelta = complex<double> (0.0,0.0);
+			for (int i = 0; i < recvcount; ++i) {
+				nk = recvbuf[i];
+				nkx = nk%_NK;
+				nky = int(nk/_NK);
+				construct_BdG(_gauss_k[nkx],_gauss_k[nky], 0.0, _hf); // set mu = 0 and h to hf
+				result = complex<double> (0.0,0.0);
+				for (int eta = 0; eta < 4; ++eta) {
+					RK_Propagator(i,eta);
+					result += DELTA_K(i,eta);
+				}
+				localDelta += -_Ueff/(8.0*M_PI*M_PI)*_gauss_w_k[nkx]*_gauss_w_k[nky]*result;
+			}
+			//cout << "rank " << ig << " has localDelta = " << localDelta << endl;
+		}
+	}
 }
 
+complex<double> ctBdG::DELTA_K(int i,int eta){
+	complex<double> result;
+	switch (sgn(_bdg_E(i,eta))) {
+		case -1:
+			result =  _bdg_u(i,eta) * conj(_bdg_v(i,eta));
+			break;
+		case 1:
+			result =  _bdg_a(i,eta) * conj(_bdg_b(i,eta));
+			break;
+		case 0:
+			result =  (_bdg_u(i,eta) * conj(_bdg_v(i,eta)) +
+					_bdg_a(i,eta) * conj(_bdg_b(i,eta)))/2.0;
+			break;
+		default:
+			break;
+	}
+	return result;
+}
 
-
+void ctBdG::RK_Propagator(int i, int eta){
+	VectorXcd wvVec(4), k1(4), k2(4), k3(4), k4(4);
+	double normwv;
+	wvVec(0) = _bdg_u(i,eta);
+	wvVec(1) = _bdg_a(i,eta);
+	wvVec(2) = _bdg_b(i,eta);
+	wvVec(3) = _bdg_v(i,eta);
+	k1 = -myI * (_bdg *  wvVec);
+	k2 = -myI * (_bdg * (wvVec+_dt*k1*0.5));
+	k3 = -myI * (_bdg * (wvVec+_dt*k2*0.5));
+	k4 = -myI * (_bdg * (wvVec+_dt*k3));
+	wvVec += _dt*(k1+2.0*k2+2.0*k3+k4)/6.0;
+	normwv = wvVec.norm();
+	wvVec /= normwv;
+	//		cout << normwv << endl;
+	_bdg_u(i,eta) = wvVec(0);
+	_bdg_a(i,eta) = wvVec(1);
+	_bdg_b(i,eta) = wvVec(2);
+	_bdg_v(i,eta) = wvVec(3);
+}

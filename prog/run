@@ -4,6 +4,6 @@ cd ../src
 make
 cd ../prog
 mpirun -np 6 tbdg
-
+#./tbdg
 
 

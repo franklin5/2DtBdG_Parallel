@@ -1,8 +1,8 @@
 CC=mpicxx
 eigenbin = /home/ld7/bin	
-CFLAGS=-c -Wall -I${eigenbin}
+CFLAGS=-c -g -Wall -I${eigenbin}
 LDFLAGS=-limf -lm
-SRC=main.cpp grst.cpp gapnumberintegral.cpp tBdG.cpp lgwt.cpp
+SRC=main.cpp grst.cpp gapnumberintegral.cpp tBdG.cpp lgwt.cpp dist.cpp
 OBJ=$(SRC:.cpp=.o)
 EXE=tbdg
 

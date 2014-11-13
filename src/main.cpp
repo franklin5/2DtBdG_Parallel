@@ -6,7 +6,6 @@
  */
 #include "stdcpp.h"
 #include "grst.h"
-#include "lgwt.h"
 #include "tBdG.h"
 #define root 0
 #define char_length	100
@@ -27,9 +26,10 @@ int main(int argc, char** argv){
 	 << "======================================================================\n";
   }
 
-  int grst_flag = 0;
+  int grst_flag = 0; // This is the place I choose to calculate ground state or quench dynamics.
   switch (grst_flag) {
 	case 1:
+	{
 		if (rank==root) {
 			// *********************************** //
 			// --> grst solution from gap and number equation
@@ -38,13 +38,15 @@ int main(int argc, char** argv){
 			grst.compute();
 		}
 		break;
+	}
 	case 0:
-		ctBdG quench(rank,size,root);
-		quench.input();
-		quench.Initialize_Euabv();
-		quench.quench();
-		quench.output();
+	{
+		ctBdG tBdG(rank,size,root);
+		tBdG.input();
+		tBdG.Initialize_Euabv();
+		tBdG.quench();
 		break;
+	}
 	default:
 		break;
   }

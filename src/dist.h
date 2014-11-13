@@ -25,8 +25,8 @@ class cDistribute {
       delete []sendbuf;
       delete []sendcounts;
       delete []displs;
-      delete []recvcounts;
-	  delete []displs_r;
+      //delete []recvcounts;
+	  //delete []displs_r;
     }
     delete []recvbuf;
   }
