@@ -155,22 +155,23 @@ void ctBdG::quench(){
 		MPI_Bcast(&_delta.imag(), 1, MPI_DOUBLE, _root, MPI_COMM_WORLD);
 
 		// Gather \Delta(k,t) complex function
-		MPI_Gatherv(local_Delta_k_r,recvcount, MPI_DOUBLE, total_Delta_k_r,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
-		MPI_Gatherv(local_Delta_k_i,recvcount, MPI_DOUBLE, total_Delta_k_i,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
+//		MPI_Gatherv(local_Delta_k_r,recvcount, MPI_DOUBLE, total_Delta_k_r,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
+//		MPI_Gatherv(local_Delta_k_i,recvcount, MPI_DOUBLE, total_Delta_k_i,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
 		// rinse and repeat
 		if (_rank == _root) {
 			if ((nt+1)%int(0.1/_dt)==0) {
 				 cout << _delta << endl;
 				 delta_output << (nt+1)*_dt << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
-				 for (int nk = 0; nk < _NK2; ++nk) {
-					Delta_K_r << total_Delta_k_r[nk] << '\t';
-					Delta_K_i << total_Delta_k_i[nk] << '\t';
-				}
-				Delta_K_r << endl;Delta_K_i << endl;
+//				 for (int nk = 0; nk < _NK2; ++nk) {
+//					Delta_K_r << total_Delta_k_r[nk] << '\t';
+//					Delta_K_i << total_Delta_k_i[nk] << '\t';
+//				}
+//				Delta_K_r << endl;Delta_K_i << endl;
 			}
 		}
 	}
-	delta_output.close();Delta_K_r.close();Delta_K_i.close();
+//	Delta_K_r.close();Delta_K_i.close();
+	delta_output.close();
 }
 
 
