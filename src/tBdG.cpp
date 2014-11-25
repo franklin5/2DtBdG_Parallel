@@ -56,7 +56,7 @@ void ctBdG :: input(){
       _bdg.resize(4,4);
       _gauss_k = new double [_NK];
       _gauss_w_k = new double [_NK];
-      gauss_lgwt(_NK,-_kc,_kc,_gauss_k,_gauss_w_k);
+      gauss_lgwt(_NK,0,_kc,_gauss_k,_gauss_w_k);
 
       myI = complex<double> (0.0,1.0);
     }
