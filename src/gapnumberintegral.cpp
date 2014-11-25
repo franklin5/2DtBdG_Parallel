@@ -26,13 +26,14 @@ void cSeek_Gap_Number::gapnumber(){
  		_mu 	   -=  alpha * (-dnd*temp1+dgd*temp2);
  		temp1 = compute(_Delta, _mu,g), temp2 = compute(_Delta, _mu,n);
  		temp = sqrt(pow(temp1,2)+pow(temp2,2));
-// 		cout.precision(16);
-// 		cout << "Delta = " << _Delta << endl;
-// 		cout << "mu = " << _mu << endl;
+ 		cout.precision(16);
+ 		cout << temp << endl;
+ 		cout << "Delta = " << _Delta << endl;
+ 		cout << "mu = " << _mu << endl;
  	}
-// 	cout.precision(16);
-// 	cout << "Delta = " << _Delta << endl;
-// 	cout << "mu = " << _mu << endl;
+ 	cout.precision(16);
+ 	cout << "Delta = " << _Delta << endl;
+ 	cout << "mu = " << _mu << endl;
 }
 
 double cSeek_Gap_Number::compute(double delta, double mu, int i){
@@ -56,7 +57,7 @@ double cSeek_Gap_Number::compute(double delta, double mu, int i){
 	for (int nkx = 0; nkx < _NK; ++nkx) {
 		for (int nky = 0; nky < _NK; ++nky) {
 			kx = _gauss_k[nkx]; ky = _gauss_k[nky];
-			result += _gauss_w_k[nkx] * _gauss_w_k[nky] * integrand(delta,mu,kx, ky,i);
+			result += _gauss_w_k[nkx] * _gauss_w_k[nky] * integrand(delta,mu,kx, ky,i)/ (4*M_PI*M_PI);
 		}
 	}
 	k1=_kc;k2=1.5*_kc;k3=2*_kc;
@@ -69,12 +70,12 @@ double cSeek_Gap_Number::compute(double delta, double mu, int i){
 	b3=(k2*k2*pow(k3,4)-pow(k2,4)*k3*k3)*y1+(pow(k1,4)*k3*k3-k1*k1*pow(k3,4))*y2+(k1*k1*pow(k2,4)-pow(k1,4)*k2*k2)*y3;
 	switch (i) {
 		case 0: //gap
-			result += (b1/(4*pow(_kc,4))+b2/(6*pow(_kc,6))+b3/(8*pow(_kc,8)))/deno;
-			result = result/ (2*M_PI);
+			result += (b1/(4*pow(_kc,4))+b2/(6*pow(_kc,6))+b3/(8*pow(_kc,8)))/deno/ (2*M_PI);
+//			result = result;
 			break;
 		case 1: //number
-			result += (b1/(2*pow(_kc,2))+b2/(4*pow(_kc,4))+b3/(6*pow(_kc,6)))/deno;
-			result = result/ (2*M_PI)-1/(2*M_PI);
+			result += (b1/(2*pow(_kc,2))+b2/(4*pow(_kc,4))+b3/(6*pow(_kc,6)))/deno/ (2*M_PI);
+			result = result-1/(2*M_PI);
 			break;
 		default:
 			break;
@@ -93,11 +94,11 @@ double cSeek_Gap_Number::integrand(double delta, double mu,
 		   ekm = sqrt(xi*xi+delta*delta+ temp - 2* temp1);
 	switch (i) {
 		case 0: //gap
-			result = sqrt(kx*kx +ky*ky)*(1.0/(2*kx*kx +ky*ky+_Eb)
+			result = (1.0/(2*kx*kx +2*ky*ky+_Eb)
 					-1.0/4*( (1+_h*_h/temp1)/ekp + (1-_h*_h/temp1)/ekm ));
 			break;
 		case 1: //number
-			result = sqrt(kx*kx +ky*ky)*(1-xi/2*( (1+temp/temp1)/ekp + (1-temp/temp1)/ekm ));
+			result = (1-xi/2*( (1+temp/temp1)/ekp + (1-temp/temp1)/ekm ));
 			break;
 		default:
 			break;
