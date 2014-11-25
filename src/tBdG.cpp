@@ -80,7 +80,7 @@ void ctBdG:: Initialize_Euabv(){
 
 				nk = recvbuf[i];
 
-				construct_BdG(_gauss_k[nk],_gauss_k[nk], _mu, _hi);
+				construct_BdG(_gauss_k[nk], _mu, _hi);
 				ces.compute(_bdg);
 
 				_bdg_E.row(i) = ces.eigenvalues();
@@ -93,8 +93,8 @@ void ctBdG:: Initialize_Euabv(){
 	}
 }
 
-void ctBdG:: construct_BdG(double kx, double ky, double mu, double h){
-	double xi = kx*kx+ky*ky-mu;
+void ctBdG:: construct_BdG(double kx, double mu, double h){
+	double xi = kx*kx-mu;
 	_bdg(0,0) = complex<double> (xi+h,0.0);
 	_bdg(0,1) = complex<double> (_v*kx,0.0);
 	_bdg(0,2) = complex<double> (0.0,0.0);
@@ -185,7 +185,7 @@ void ctBdG:: compute_DeltaK(complex<double>& localDelta){
 			localDelta = complex<double> (0.0,0.0);
 			for (int i = 0; i < recvcount; ++i) {
 				nk = recvbuf[i];
-				construct_BdG(_gauss_k[nk],_gauss_k[nk], _mu, _hf); // set mu = 0 and h to hf
+				construct_BdG(_gauss_k[nk], _mu, _hf); // set mu = 0 and h to hf
 				result = complex<double> (0.0,0.0);
 				for (int eta = 0; eta < 4; ++eta) {
 					RK_Propagator(i,eta);

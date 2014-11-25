@@ -40,7 +40,7 @@ public:
     void compute_DeltaK(complex<double>&);
     void quench();
     void Initialize_Euabv();
-    void construct_BdG(double, double, double, double);
+    void construct_BdG(double, double, double);
 
 };
 
