@@ -21,18 +21,18 @@ private:
     complex<double> myI;
     MatrixXd _bdg_E;
     MatrixXcd _bdg, _bdg_u, _bdg_a, _bdg_b, _bdg_v;
-//    double* local_Delta_k_r, *local_Delta_k_i, *total_Delta_k_r, *total_Delta_k_i;
+    double* local_Delta_k_r, *local_Delta_k_i, *total_Delta_k_r, *total_Delta_k_i;
 public:
     ctBdG (const int rank, const int size, const int root) : cDistribute(rank,size,root){}
     ~ctBdG(){
     	delete []_gauss_k;
     	delete []_gauss_w_k;
-//    	delete []local_Delta_k_r;
-//    	delete []local_Delta_k_i;
-//    	if (_rank==_root) {
-//    		delete []total_Delta_k_r;
-//    		delete []total_Delta_k_i;
-//    	}
+    	delete []local_Delta_k_r;
+    	delete []local_Delta_k_i;
+    	if (_rank==_root) {
+    		delete []total_Delta_k_r;
+    		delete []total_Delta_k_i;
+    	}
     }
     void input();
     complex<double> DELTA_K(int,int);
