@@ -27,7 +27,8 @@ public:
 
     void gapnumber();
     double compute(double, double, int);
-    double integrand(double, double, double, int);
+    double integrand(double, double, double, double, int);
+    double integrand_k(double, double, double, int);
     void getresult(double& delta, double& mu, double& Eg)
     {delta = _Delta; mu = _mu; Eg = abs(_h-sqrt(_mu*_mu+_Delta*_Delta));}
     void printEg(){ cout << "Eg = " << abs(_h-sqrt(_mu*_mu+_Delta*_Delta)) <<endl;}

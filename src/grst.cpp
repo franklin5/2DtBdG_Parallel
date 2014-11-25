@@ -12,7 +12,7 @@ void cGRST :: compute(){
 
 	int    NK = 500;    double kc = 10;
 	double *gauss_k = new double [NK];double *gauss_w_k = new double [NK];
-	gauss_lgwt(NK,0,kc,gauss_k,gauss_w_k);
+	gauss_lgwt(NK,-kc,kc,gauss_k,gauss_w_k);
 	sGauss gauss;
 	gauss.N=NK; gauss.kc=kc;
 	gauss.gauss_x = gauss_k;gauss.gauss_w = gauss_w_k;

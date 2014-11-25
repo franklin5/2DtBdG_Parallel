@@ -26,7 +26,7 @@ int main(int argc, char** argv){
 	 << "======================================================================\n";
   }
 
-  int grst_flag = 0; // This is the place I choose to calculate ground state or quench dynamics.
+  int grst_flag = 1; // This is the place I choose to calculate ground state or quench dynamics.
   switch (grst_flag) {
 	case 1:
 	{
