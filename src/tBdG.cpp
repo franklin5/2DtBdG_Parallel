@@ -40,7 +40,7 @@ void ctBdG :: input(){
       _v = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _v << endl;
       fscanf(input,"%s %d", dummyname, &intdummyvalue);
       _NK = intdummyvalue;    if (ig == _root) cout << dummyname << "=" << _NK << endl;
-      _NK2 = _NK*_NK;
+      _NK2 = _NK;
       fscanf(input,"%s %lf", dummyname, &dummyvalue);
       _kc = dummyvalue;    if (ig == _root) cout << dummyname << "=" << _kc << endl;
       fscanf(input,"%s %lf", dummyname, &dummyvalue);
@@ -82,7 +82,7 @@ void ctBdG:: Initialize_Euabv(){
 				nkx = nk%_NK;
 				nky = int(nk/_NK);
 
-				construct_BdG(_gauss_k[nkx],_gauss_k[nky], _mu, _hi);
+				construct_BdG(_gauss_k[nk],_gauss_k[nk], _mu, _hi);
 				ces.compute(_bdg);
 
 				_bdg_E.row(i) = ces.eigenvalues();
@@ -98,20 +98,20 @@ void ctBdG:: Initialize_Euabv(){
 void ctBdG:: construct_BdG(double kx, double ky, double mu, double h){
 	double xi = kx*kx+ky*ky-mu;
 	_bdg(0,0) = complex<double> (xi+h,0.0);
-	_bdg(0,1) = complex<double> (_v*kx,-_v*ky);
+	_bdg(0,1) = complex<double> (_v*kx,0.0);
 	_bdg(0,2) = complex<double> (0.0,0.0);
 	_bdg(0,3) = -_delta;
-	_bdg(1,0) = complex<double> (_v*kx,_v*ky);
+	_bdg(1,0) = complex<double> (_v*kx,0.0);
 	_bdg(1,1) = complex<double> (xi-h,0.0);
 	_bdg(1,2) = _delta;
 	_bdg(1,3) = complex<double> (0.0,0.0);
 	_bdg(2,0) = complex<double> (0.0,0.0);
 	_bdg(2,1) = conj(_delta);
 	_bdg(2,2) = complex<double> (-(xi+h),0.0);
-	_bdg(2,3) = complex<double> (_v*kx,_v*ky);
+	_bdg(2,3) = complex<double> (_v*kx,0.0);
 	_bdg(3,0) = -conj(_delta);
 	_bdg(3,1) = complex<double> (0.0,0.0);
-	_bdg(3,2) = complex<double> (_v*kx,-_v*ky);
+	_bdg(3,2) = complex<double> (_v*kx,0.0);
 	_bdg(3,3) = complex<double> (-xi+h,0.0);
 
 }
@@ -190,7 +190,7 @@ void ctBdG:: compute_DeltaK(complex<double>& localDelta){
 				nk = recvbuf[i];
 				nkx = nk%_NK;
 				nky = int(nk/_NK);
-				construct_BdG(_gauss_k[nkx],_gauss_k[nky], _mu, _hf); // set mu = 0 and h to hf
+				construct_BdG(_gauss_k[nk],_gauss_k[nk], _mu, _hf); // set mu = 0 and h to hf
 				result = complex<double> (0.0,0.0);
 				for (int eta = 0; eta < 4; ++eta) {
 					RK_Propagator(i,eta);
@@ -198,7 +198,7 @@ void ctBdG:: compute_DeltaK(complex<double>& localDelta){
 				}
 				local_Delta_k_r[i] = result.real();
 				local_Delta_k_i[i] = result.imag();
-				localDelta += -_Ueff/(8.0*M_PI*M_PI)*_gauss_w_k[nkx]*_gauss_w_k[nky]*result;
+				localDelta += -_Ueff/(4.0*M_PI)*_gauss_k[nk]*_gauss_w_k[nk]*result;
 			}
 			//cout << "rank " << ig << " has localDelta = " << localDelta << endl;
 		}
