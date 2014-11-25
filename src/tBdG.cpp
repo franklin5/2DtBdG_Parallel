@@ -66,7 +66,7 @@ void ctBdG :: input(){
 void ctBdG:: Initialize_Euabv(){
 	SelfAdjointEigenSolver<MatrixXcd> ces;
 	distribution(_NK2);
-    int nkx, nky, nk;
+    int nk;
     for (int ig = 0; ig < _size; ++ig) {
 		if (ig==_rank) {
 			_bdg_E.resize(recvcount,4);
@@ -79,8 +79,6 @@ void ctBdG:: Initialize_Euabv(){
 			for (int i = 0; i < recvcount; ++i) {
 
 				nk = recvbuf[i];
-				nkx = nk%_NK;
-				nky = int(nk/_NK);
 
 				construct_BdG(_gauss_k[nk],_gauss_k[nk], _mu, _hi);
 				ces.compute(_bdg);
@@ -121,7 +119,6 @@ void ctBdG::quench(){
 	complex<double> localDelta;
 	ofstream delta_output;
 	ofstream akx, aky, Delta_K_r, Delta_K_i;
-	int nkx, nky;
 	if (_rank == _root) {
 		total_Delta_k_r = new double[_NK2];
 		total_Delta_k_i = new double[_NK2];
@@ -181,15 +178,13 @@ void ctBdG::quench(){
 
 
 void ctBdG:: compute_DeltaK(complex<double>& localDelta){
-    int nkx, nky, nk;
+    int nk;
     complex<double> result;
 	for (int ig = 0; ig < _size; ++ig) {
 		if (ig==_rank) {
 			localDelta = complex<double> (0.0,0.0);
 			for (int i = 0; i < recvcount; ++i) {
 				nk = recvbuf[i];
-				nkx = nk%_NK;
-				nky = int(nk/_NK);
 				construct_BdG(_gauss_k[nk],_gauss_k[nk], _mu, _hf); // set mu = 0 and h to hf
 				result = complex<double> (0.0,0.0);
 				for (int eta = 0; eta < 4; ++eta) {
