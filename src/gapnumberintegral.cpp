@@ -28,8 +28,8 @@ void cSeek_Gap_Number::gapnumber(){
  		temp = sqrt(pow(temp1,2)+pow(temp2,2));
  		cout.precision(16);
  		cout << temp << endl;
- 		cout << "Delta = " << _Delta << endl;
- 		cout << "mu = " << _mu << endl;
+// 		cout << "Delta = " << _Delta << endl;
+// 		cout << "mu = " << _mu << endl;
  	}
  	cout.precision(16);
  	cout << "Delta = " << _Delta << endl;

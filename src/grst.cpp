@@ -16,7 +16,7 @@ void cGRST :: compute(){
 	sGauss gauss;
 	gauss.N=NK; gauss.kc=kc;
 	gauss.gauss_x = gauss_k;gauss.gauss_w = gauss_w_k;
-	double mu0= 0.2;    double delta0 = 0.662; double Eg;
+	double mu0=  0.1981870460901221;    double delta0 = 0.6630735676243233; double Eg;
 	double Zeeman = 0.0;
 	do {
 
