@@ -74,8 +74,8 @@ void ctBdG:: Initialize_Euabv(){
 			_bdg_a.resize(recvcount,4);
 			_bdg_b.resize(recvcount,4);
 			_bdg_v.resize(recvcount,4);
-			local_Delta_k_r = new double[recvcount];
-			local_Delta_k_i = new double[recvcount];
+			//			local_Delta_k_r = new double[recvcount];
+			//local_Delta_k_i = new double[recvcount];
 			for (int i = 0; i < recvcount; ++i) {
 
 				nk = recvbuf[i];
@@ -120,8 +120,8 @@ void ctBdG::quench(){
 	ofstream delta_output;
 	ofstream akx, aky, Delta_K_r, Delta_K_i;
 	if (_rank == _root) {
-		total_Delta_k_r = new double[_NK2];
-		total_Delta_k_i = new double[_NK2];
+	  //		total_Delta_k_r = new double[_NK2];
+	  //total_Delta_k_i = new double[_NK2];
 /*		string filename = "hi_" + to_string(_hi) + "hf_" + to_string(_hf) + ".dat"; // --> This is only available for c++11 feature...
 		delta_output.open(filename.c_str());*/
 		char filename[50];
@@ -136,10 +136,10 @@ void ctBdG::quench(){
 			aky << _gauss_k[nk] << endl;
 		}
 		akx.close();aky.close();
-		sprintf(filename,"hi_%ghf_%g_Delta_K_r.dat",_hi,_hf);
+		/*		sprintf(filename,"hi_%ghf_%g_Delta_K_r.dat",_hi,_hf);
 		Delta_K_r.open(filename);Delta_K_r.is_open();
 		sprintf(filename,"hi_%ghf_%g_Delta_K_i.dat",_hi,_hf);
-		Delta_K_i.open(filename);Delta_K_i.is_open();
+		Delta_K_i.open(filename);Delta_K_i.is_open();*/
 		cout.precision(16);
 		cout << _delta << endl;
 		delta_output << 0.0 << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
@@ -157,22 +157,22 @@ void ctBdG::quench(){
 		MPI_Bcast(&_delta.imag(), 1, MPI_DOUBLE, _root, MPI_COMM_WORLD);
 
 		// Gather \Delta(k,t) complex function
-		MPI_Gatherv(local_Delta_k_r,recvcount, MPI_DOUBLE, total_Delta_k_r,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
-		MPI_Gatherv(local_Delta_k_i,recvcount, MPI_DOUBLE, total_Delta_k_i,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
+		//		MPI_Gatherv(local_Delta_k_r,recvcount, MPI_DOUBLE, total_Delta_k_r,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
+		//MPI_Gatherv(local_Delta_k_i,recvcount, MPI_DOUBLE, total_Delta_k_i,recvcounts,displs_r,MPI_DOUBLE, _root, COMM_WORLD);
 		// rinse and repeat
 		if (_rank == _root) {
-//			if (nt%int(0.1/_dt)==0) {
-				 cout << _delta << endl;
-				 delta_output << nt*_dt << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
-				 for (int nk = 0; nk < _NK2; ++nk) {
-					Delta_K_r << total_Delta_k_r[nk] << '\t';
-					Delta_K_i << total_Delta_k_i[nk] << '\t';
-				}
-				Delta_K_r << endl;Delta_K_i << endl;
-//			}
+		  if (nt%int(0.1/_dt)==0) {
+		    cout << nt*_dt << '\t' << _delta << endl;
+		    /*			 for (int nk = 0; nk < _NK2; ++nk) {
+		      Delta_K_r << total_Delta_k_r[nk] << '\t';
+		      Delta_K_i << total_Delta_k_i[nk] << '\t';
+		      }
+		      Delta_K_r << endl;Delta_K_i << endl;*/
+		  }
+		  delta_output << nt*_dt << '\t' << _delta.real() << '\t' << _delta.imag() << endl;
 		}
 	}
-	Delta_K_r.close();Delta_K_i.close();
+	//	Delta_K_r.close();Delta_K_i.close();
 	delta_output.close();
 }
 
@@ -191,8 +191,8 @@ void ctBdG:: compute_DeltaK(complex<double>& localDelta){
 					RK_Propagator(i,eta);
 					result += DELTA_K(i,eta);
 				}
-				local_Delta_k_r[i] = result.real();
-				local_Delta_k_i[i] = result.imag();
+				//				local_Delta_k_r[i] = result.real();
+				//local_Delta_k_i[i] = result.imag();
 				localDelta += -_Ueff/(4.0*M_PI)*_gauss_k[nk]*_gauss_w_k[nk]*result;
 			}
 			//cout << "rank " << ig << " has localDelta = " << localDelta << endl;
